@@ -3,7 +3,7 @@ import { View, Text, Image, ScrollView, Alert, StyleSheet} from 'react-native';
 import Constants from 'expo-constants';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import {Feather as Icon} from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
 import * as Location from 'expo-location';
@@ -25,13 +25,21 @@ interface Point{
   longitude: number
 }
 
+interface Params{
+  uf: string,
+  city: string
+}
+
 const Points = () => {
     const navigation = useNavigation();
+    const route = useRoute();
 
     const [items, setItems] = useState<Item[]>([]);
     const [points, setPoints] = useState<Point[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
+
+    const routeParams = route.params as Params;
 
     useEffect(
       () => {
@@ -65,14 +73,14 @@ const Points = () => {
       () => {
         api.get('points', {
           params: {
-            city: 'Curitiba',
-            uf: 'PR',
-            items: [5,6]
+            city: routeParams.city,
+            uf: routeParams.uf,
+            items: selectedItems
           }
         }).then(response => {
           setPoints(response.data);
         });
-      }, []
+      }, [selectedItems]
     );
 
     function handleNavigateBack(){
